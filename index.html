@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>index</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#111214;
+    --surface:#1C1E22;
+    --border:#2C2F35;
+    --border-md:#3E424B;
+    --text:#EDEEF0;
+    --text-2:#9BA0AA;
+    --text-3:#5A5E68;
+    --accent:#4D9EFA;
+    --accent-light:#162033;
+    --accent-hover:#6DB4FF;
+    --danger-bg:#2A1215;
+    --danger-border:#7F1D1D;
+    --r-sm:6px;
+    --r-md:10px;
+    --r-lg:14px;
+  }
+  html{font-size:16px}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:1.5rem 1rem 3rem;
+  }
+  #app{width:100%;max-width:560px}
+
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* ── HOME ── */
+  .home-header{margin-bottom:2rem}
+  .home-header h1{
+    font-size:26px;font-weight:600;letter-spacing:-.02em;
+    color:var(--text);margin-bottom:4px
+  }
+  .home-header p{font-size:14px;color:var(--text-2);line-height:1.6}
+
+  .section-block{margin-bottom:1.5rem}
+  .section-label{
+    font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--text-3);margin-bottom:10px
+  }
+
+  .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .mode-btn{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);
+    padding:14px;text-align:left;cursor:pointer;transition:border-color .12s,background .12s;
+  }
+  .mode-btn:hover{border-color:var(--border-md)}
+  .mode-btn.selected{
+    border:2px solid var(--accent);background:var(--accent-light);
+  }
+  .mode-btn .m-label{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+  .mode-btn .m-seq{font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums}
+
+  .diff-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .diff-btn{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);
+    padding:10px 4px;text-align:center;cursor:pointer;transition:border-color .12s,background .12s;
+  }
+  .diff-btn:hover{border-color:var(--border-md)}
+  .diff-btn.selected{border:2px solid var(--accent);background:var(--accent-light)}
+  .diff-btn .d-size{font-size:14px;font-weight:600;color:var(--text)}
+  .diff-btn .d-lv{font-size:10px;color:var(--text-3);margin-top:2px}
+
+  .settings-flex{display:flex;gap:1.5rem;flex-wrap:wrap}
+  .toggle-group-wrap{}
+  .toggle-group-wrap .section-label{margin-bottom:6px}
+  .toggle-group{display:flex;gap:4px}
+  .toggle-btn{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);
+    padding:6px 12px;font-size:13px;cursor:pointer;color:var(--text-2);transition:all .1s;
+  }
+  .toggle-btn:hover{border-color:var(--border-md);color:var(--text)}
+  .toggle-btn.selected{
+    background:var(--accent);border-color:var(--accent);color:#0A0E14;font-weight:600;
+  }
+
+  .start-btn{
+    display:block;width:100%;padding:15px;
+    background:var(--accent);color:#0A0E14;border:none;border-radius:var(--r-md);
+    font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.01em;
+    transition:background .12s;margin-top:2rem;
+  }
+  .start-btn:hover{background:var(--accent-hover)}
+  .start-btn:active{transform:scale(.98)}
+
+  /* ── GAME ── */
+  .game-header{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border);
+  }
+  .timer-wrap{}
+  .timer{
+    font-size:32px;font-weight:600;font-variant-numeric:tabular-nums;
+    letter-spacing:-.02em;color:var(--text);line-height:1;
+  }
+  .game-stats{display:flex;gap:16px;margin-top:5px}
+  .game-stat{font-size:12px;color:var(--text-3)}
+  .game-stat span{font-weight:600;color:var(--text-2)}
+  .quit-btn{
+    background:none;border:1px solid var(--border);border-radius:var(--r-sm);
+    padding:6px 14px;font-size:13px;cursor:pointer;color:var(--text-2);
+    transition:border-color .1s;
+  }
+  .quit-btn:hover{border-color:var(--border-md)}
+
+  .target-bar{
+    text-align:center;margin-bottom:14px;
+    font-size:14px;color:var(--text-2);
+  }
+  .target-bar .target-num{
+    display:inline-block;
+    font-size:28px;font-weight:700;color:var(--accent);
+    margin-left:6px;line-height:1;
+  }
+  .target-bar .progress{
+    font-size:12px;color:var(--text-3);margin-left:8px;
+  }
+
+  .grid-wrap{display:flex;justify-content:center;align-items:center}
+  #game-grid{display:grid;gap:6px}
+  .cell{
+    display:flex;align-items:center;justify-content:center;
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--r-md);cursor:pointer;font-weight:700;
+    color:var(--text);transition:background .1s,transform .1s,opacity .15s;
+    user-select:none;
+  }
+  .cell:hover{background:#26292F;border-color:var(--border-md)}
+  .cell:active{transform:scale(.93)}
+  .cell.gone{opacity:0;pointer-events:none}
+  .cell.wrong{
+    background:var(--danger-bg)!important;border-color:var(--danger-border)!important;
+    animation:shake .25s ease;
+  }
+  .cell.hint{
+    animation:hint-flash .5s steps(1) infinite;
+    border-width:3px!important;
+  }
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-4px)}
+    75%{transform:translateX(4px)}
+  }
+  @keyframes hint-flash{
+    0%,49%{
+      background:#FACC15!important;
+      border-color:#D97706!important;
+      color:#78350F!important;
+      transform:scale(1.08);
+      box-shadow:0 0 0 4px rgba(250,204,21,0.35);
+    }
+    50%,100%{
+      background:#F97316!important;
+      border-color:#C2410C!important;
+      color:#fff!important;
+      transform:scale(1.0);
+      box-shadow:0 0 0 0px rgba(250,204,21,0);
+    }
+  }
+
+  /* ── RESULT ── */
+  .result-header{
+    margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border);
+  }
+  .result-header h2{font-size:22px;font-weight:600;margin-bottom:4px}
+  .result-header p{font-size:14px;color:var(--text-2)}
+
+  .metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.5rem}
+  .metric{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);
+    padding:14px;text-align:center;
+  }
+  .metric .val{font-size:24px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+  .metric .lbl{font-size:11px;color:var(--text-3);margin-top:3px}
+
+  .detail-box{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);
+    padding:16px;margin-bottom:1.5rem;
+  }
+  .detail-title{font-size:12px;font-weight:600;color:var(--text-3);margin-bottom:12px;letter-spacing:.05em;text-transform:uppercase}
+  .bars-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+  .bar-row .bar-head{
+    display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;
+  }
+  .bar-row .bar-name{font-size:13px;color:var(--text-2)}
+  .bar-row .bar-count{font-size:13px;font-weight:600;color:var(--text)}
+  .bar-track{height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+  .bar-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+  .result-actions{display:flex;flex-direction:column;gap:8px}
+  .btn-primary{
+    display:block;width:100%;padding:14px;
+    background:var(--accent);color:#0A0E14;border:none;border-radius:var(--r-md);
+    font-size:15px;font-weight:700;cursor:pointer;transition:background .12s;
+  }
+  .btn-primary:hover{background:var(--accent-hover)}
+  .btn-secondary{
+    display:block;width:100%;padding:12px;
+    background:var(--surface);color:var(--text-2);
+    border:1px solid var(--border);border-radius:var(--r-md);
+    font-size:14px;cursor:pointer;transition:border-color .1s,color .1s;
+  }
+  .btn-secondary:hover{border-color:var(--border-md);color:var(--text)}
+
+  @media(max-width:400px){
+    body{padding:1rem .75rem 2rem}
+    .diff-grid{grid-template-columns:repeat(3,1fr)}
+    .metrics-grid{grid-template-columns:1fr 1fr}
+    .bars-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HOME -->
+<div id="home-screen" class="screen active">
+  <div class="home-header">
+    <h1>探索トレーニング</h1>
+    <p>数字を順番にタップして、注意力と視覚探索を鍛えます。</p>
+  </div>
+
+  <div class="section-block">
+    <div class="section-label">モード</div>
+    <div class="mode-grid">
+      <button class="mode-btn selected" data-mode="asc" onclick="selectMode(this)">
+        <div class="m-label">昇順</div>
+        <div class="m-seq">1 → 2 → 3 → …</div>
+      </button>
+      <button class="mode-btn" data-mode="desc" onclick="selectMode(this)">
+        <div class="m-label">降順</div>
+        <div class="m-seq">最大 → … → 1</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-label">難易度</div>
+    <div class="diff-grid">
+      <button class="diff-btn selected" data-size="3" onclick="selectDiff(this)">
+        <div class="d-size">3×3</div>
+        <div class="d-lv">初級</div>
+      </button>
+      <button class="diff-btn" data-size="4" onclick="selectDiff(this)">
+        <div class="d-size">4×4</div>
+        <div class="d-lv">中級</div>
+      </button>
+      <button class="diff-btn" data-size="5" onclick="selectDiff(this)">
+        <div class="d-size">5×5</div>
+        <div class="d-lv">上級</div>
+      </button>
+      <button class="diff-btn" data-size="6" onclick="selectDiff(this)">
+        <div class="d-size">6×6</div>
+        <div class="d-lv">応用</div>
+      </button>
+      <button class="diff-btn" data-size="7" onclick="selectDiff(this)">
+        <div class="d-size">7×7</div>
+        <div class="d-lv">上級+</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-label">設定</div>
+    <div class="settings-flex">
+      <div class="toggle-group-wrap">
+        <div class="section-label">数字サイズ</div>
+        <div class="toggle-group" id="font-group">
+          <button class="toggle-btn" data-val="small" onclick="selectToggle('font-group',this)">小</button>
+          <button class="toggle-btn selected" data-val="medium" onclick="selectToggle('font-group',this)">中</button>
+          <button class="toggle-btn" data-val="large" onclick="selectToggle('font-group',this)">大</button>
+        </div>
+      </div>
+      <div class="toggle-group-wrap">
+        <div class="section-label">マスサイズ</div>
+        <div class="toggle-group" id="cell-group">
+          <button class="toggle-btn selected" data-val="normal" onclick="selectToggle('cell-group',this)">標準</button>
+          <button class="toggle-btn" data-val="large" onclick="selectToggle('cell-group',this)">大</button>
+        </div>
+      </div>
+      <div class="toggle-group-wrap">
+        <div class="section-label">ヒント</div>
+        <div class="toggle-group" id="hint-group">
+          <button class="toggle-btn selected" data-val="0" onclick="selectToggle('hint-group',this)">OFF</button>
+          <button class="toggle-btn" data-val="10" onclick="selectToggle('hint-group',this)">10秒</button>
+          <button class="toggle-btn" data-val="20" onclick="selectToggle('hint-group',this)">20秒</button>
+          <button class="toggle-btn" data-val="30" onclick="selectToggle('hint-group',this)">30秒</button>
+        </div>
+      </div>
+      <div class="toggle-group-wrap">
+        <div class="section-label">不正解フィードバック</div>
+        <div class="toggle-group" id="fb-group">
+          <button class="toggle-btn selected" data-val="on" onclick="selectToggle('fb-group',this)">ON</button>
+          <button class="toggle-btn" data-val="off" onclick="selectToggle('fb-group',this)">OFF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="startGame()">スタート</button>
+</div>
+
+<!-- GAME -->
+<div id="game-screen" class="screen">
+  <div class="game-header">
+    <div class="timer-wrap">
+      <div class="timer" id="timer-display">00:00</div>
+      <div class="game-stats">
+        <div class="game-stat">ミス <span id="miss-count">0</span></div>
+        <div class="game-stat">ヒント <span id="hint-count">0</span></div>
+      </div>
+    </div>
+    <button class="quit-btn" onclick="quitGame()">中断</button>
+  </div>
+  <div class="target-bar">
+    次にタップ：<span class="target-num" id="target-num">1</span>
+    <span class="progress" id="progress-text"></span>
+  </div>
+  <div class="grid-wrap">
+    <div id="game-grid"></div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result-screen" class="screen">
+  <div class="result-header">
+    <h2>完了！</h2>
+    <p id="result-sub">お疲れ様でした</p>
+  </div>
+  <div class="metrics-grid">
+    <div class="metric"><div class="val" id="res-time">-</div><div class="lbl">タイム</div></div>
+    <div class="metric"><div class="val" id="res-miss">-</div><div class="lbl">ミスタップ</div></div>
+    <div class="metric"><div class="val" id="res-hint">-</div><div class="lbl">ヒント使用</div></div>
+  </div>
+  <div class="detail-box">
+    <div class="detail-title">タップ分布</div>
+    <div class="bars-grid">
+      <div class="bar-row">
+        <div class="bar-head"><span class="bar-name">左側</span><span class="bar-count" id="lbl-left">-</span></div>
+        <div class="bar-track"><div class="bar-fill" id="bar-left" style="width:0%"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-head"><span class="bar-name">右側</span><span class="bar-count" id="lbl-right">-</span></div>
+        <div class="bar-track"><div class="bar-fill" id="bar-right" style="width:0%"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-head"><span class="bar-name">上側</span><span class="bar-count" id="lbl-top">-</span></div>
+        <div class="bar-track"><div class="bar-fill" id="bar-top" style="width:0%"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-head"><span class="bar-name">下側</span><span class="bar-count" id="lbl-bottom">-</span></div>
+        <div class="bar-track"><div class="bar-fill" id="bar-bottom" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="result-actions">
+    <button class="btn-primary" onclick="retryGame()">もう一度</button>
+    <button class="btn-secondary" onclick="goHome()">ホームに戻る</button>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+var cfg = {mode:'asc', size:3, fontSize:'medium', cellSize:'normal', hint:0, feedback:'on'};
+var state = {};
+
+function selectMode(el){
+  document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.remove('selected')});
+  el.classList.add('selected');
+  cfg.mode = el.dataset.mode;
+}
+function selectDiff(el){
+  document.querySelectorAll('.diff-btn').forEach(function(b){b.classList.remove('selected')});
+  el.classList.add('selected');
+  cfg.size = parseInt(el.dataset.size);
+}
+function selectToggle(gid, el){
+  document.querySelectorAll('#'+gid+' .toggle-btn').forEach(function(b){b.classList.remove('selected')});
+  el.classList.add('selected');
+  var v = el.dataset.val;
+  if(gid==='font-group') cfg.fontSize = v;
+  else if(gid==='cell-group') cfg.cellSize = v;
+  else if(gid==='hint-group') cfg.hint = parseInt(v);
+  else if(gid==='fb-group') cfg.feedback = v;
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+}
+
+function shuffle(arr){
+  for(var i=arr.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;
+  }
+  return arr;
+}
+
+function getFontPx(){
+  return {small:15, medium:20, large:27}[cfg.fontSize]||20;
+}
+
+function getCellPx(){
+  var maxW = Math.min(window.innerWidth-32, 560);
+  var gap = 6;
+  var base = Math.floor((maxW - gap*(cfg.size-1)) / cfg.size);
+  var sz = Math.max(44, Math.min(base, cfg.cellSize==='large'?100:80));
+  return sz;
+}
+
+function startGame(){
+  var n = cfg.size * cfg.size;
+  var seq = [];
+  for(var i=1;i<=n;i++) seq.push(i);
+  if(cfg.mode==='desc') seq.reverse();
+
+  var positions = shuffle(seq.slice());
+  var cellPx = getCellPx();
+  var fontPx = getFontPx();
+
+  state = {
+    seq: seq,
+    positions: positions,
+    idx: 0,
+    misses: 0,
+    hints: 0,
+    startTime: Date.now(),
+    elapsed: 0,
+    timerInt: null,
+    hintTO: null,
+    hintCell: null,
+    tapLog: [],
+    size: cfg.size,
+    cellPx: cellPx
+  };
+
+  document.getElementById('miss-count').textContent = '0';
+  document.getElementById('hint-count').textContent = '0';
+  document.getElementById('timer-display').textContent = '00:00';
+
+  var grid = document.getElementById('game-grid');
+  grid.style.gridTemplateColumns = 'repeat('+cfg.size+', '+cellPx+'px)';
+  grid.innerHTML = '';
+
+  positions.forEach(function(val, idx){
+    var cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.style.width = cellPx+'px';
+    cell.style.height = cellPx+'px';
+    cell.style.fontSize = fontPx+'px';
+    cell.dataset.val = val;
+    cell.dataset.idx = idx;
+    cell.textContent = val;
+    cell.addEventListener('click', function(){ handleTap(cell, val, idx); });
+    grid.appendChild(cell);
+  });
+
+  updateTarget();
+  showScreen('game-screen');
+
+  state.timerInt = setInterval(function(){
+    state.elapsed = Math.floor((Date.now()-state.startTime)/1000);
+    var m = Math.floor(state.elapsed/60).toString().padStart(2,'0');
+    var s = (state.elapsed%60).toString().padStart(2,'0');
+    document.getElementById('timer-display').textContent = m+':'+s;
+  }, 200);
+
+  resetHint();
+}
+
+function handleTap(cell, val, idx){
+  var target = state.seq[state.idx];
+  var col = idx % state.size;
+  var row = Math.floor(idx / state.size);
+  var half = state.size / 2;
+
+  if(val === target){
+    clearHint();
+    cell.classList.add('gone');
+    state.tapLog.push({
+      side: col < half ? 'left' : 'right',
+      vert: row < half ? 'top' : 'bottom'
+    });
+    state.idx++;
+    if(state.idx >= state.seq.length){
+      finishGame();
+    } else {
+      updateTarget();
+      resetHint();
+    }
+  } else {
+    if(cfg.feedback==='on'){
+      state.misses++;
+      document.getElementById('miss-count').textContent = state.misses;
+      cell.classList.add('wrong');
+      setTimeout(function(){ cell.classList.remove('wrong'); }, 350);
+    }
+  }
+}
+
+function updateTarget(){
+  var t = state.seq[state.idx];
+  document.getElementById('target-num').textContent = t;
+  document.getElementById('progress-text').textContent =
+    '（'+state.idx+' / '+state.seq.length+'）';
+}
+
+function clearHint(){
+  if(state.hintTO){ clearTimeout(state.hintTO); state.hintTO=null; }
+  if(state.hintCell){ state.hintCell.classList.remove('hint'); state.hintCell=null; }
+}
+
+function resetHint(){
+  clearHint();
+  if(!cfg.hint) return;
+  state.hintTO = setTimeout(function(){ showHint(); }, cfg.hint*1000);
+}
+
+function showHint(){
+  var target = state.seq[state.idx];
+  var cells = document.querySelectorAll('.cell');
+  for(var i=0;i<cells.length;i++){
+    var c = cells[i];
+    if(parseInt(c.dataset.val)===target && !c.classList.contains('gone')){
+      c.classList.add('hint');
+      state.hintCell = c;
+      state.hints++;
+      document.getElementById('hint-count').textContent = state.hints;
+      break;
+    }
+  }
+}
+
+function finishGame(){
+  clearInterval(state.timerInt);
+  clearHint();
+
+  var secs = state.elapsed;
+  var m = Math.floor(secs/60), s = secs%60;
+  var timeStr = m>0 ? m+'分'+s+'秒' : s+'秒';
+
+  var log = state.tapLog;
+  var total = log.length || 1;
+  var left=0,right=0,top=0,bottom=0;
+  log.forEach(function(t){
+    if(t.side==='left') left++; else right++;
+    if(t.vert==='top') top++; else bottom++;
+  });
+
+  document.getElementById('res-time').textContent = timeStr;
+  document.getElementById('res-miss').textContent = state.misses+'回';
+  document.getElementById('res-hint').textContent = state.hints+'回';
+
+  var diff = cfg.size+'×'+cfg.size;
+  var modeLabel = cfg.mode==='asc'?'昇順':'降順';
+  document.getElementById('result-sub').textContent =
+    diff+' · '+modeLabel+' · '+state.seq.length+'マス';
+
+  showScreen('result-screen');
+
+  setTimeout(function(){
+    setBar('bar-left','lbl-left', left, total);
+    setBar('bar-right','lbl-right', right, total);
+    setBar('bar-top','lbl-top', top, total);
+    setBar('bar-bottom','lbl-bottom', bottom, total);
+  }, 80);
+}
+
+function setBar(barId, lblId, count, total){
+  var pct = Math.round(count/total*100);
+  document.getElementById(barId).style.width = Math.max(pct,0)+'%';
+  document.getElementById(lblId).textContent = count+'回';
+}
+
+function quitGame(){
+  clearInterval(state.timerInt);
+  clearHint();
+  showScreen('home-screen');
+}
+
+function retryGame(){ startGame(); }
+function goHome(){ showScreen('home-screen'); }
+</script>
+</body>
+</html>
