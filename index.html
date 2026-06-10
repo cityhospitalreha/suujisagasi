@@ -98,39 +98,51 @@
   .start-btn:active{transform:scale(.98)}
 
   /* ── GAME ── */
-  .game-header{
-    display:flex;align-items:flex-start;justify-content:space-between;
-    margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border);
+  #game-screen{
+    position:fixed;inset:0;
+    display:none;
+    flex-direction:column;
+    padding:12px 12px 8px;
   }
-  .timer-wrap{}
+  #game-screen.active{display:flex}
+
+  .game-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-bottom:8px;border-bottom:1px solid var(--border);
+    flex-shrink:0;
+  }
+  .timer-wrap{display:flex;align-items:center;gap:16px}
   .timer{
-    font-size:32px;font-weight:600;font-variant-numeric:tabular-nums;
+    font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;
     letter-spacing:-.02em;color:var(--text);line-height:1;
   }
-  .game-stats{display:flex;gap:16px;margin-top:5px}
+  .game-stats{display:flex;gap:12px}
   .game-stat{font-size:12px;color:var(--text-3)}
   .game-stat span{font-weight:600;color:var(--text-2)}
   .quit-btn{
     background:none;border:1px solid var(--border);border-radius:var(--r-sm);
-    padding:6px 14px;font-size:13px;cursor:pointer;color:var(--text-2);
-    transition:border-color .1s;
+    padding:5px 12px;font-size:13px;cursor:pointer;color:var(--text-2);
+    transition:border-color .1s;flex-shrink:0;
   }
   .quit-btn:hover{border-color:var(--border-md)}
 
   .target-bar{
-    text-align:center;margin-bottom:14px;
-    font-size:14px;color:var(--text-2);
+    text-align:center;padding:6px 0 4px;flex-shrink:0;
+    font-size:13px;color:var(--text-2);
   }
   .target-bar .target-num{
     display:inline-block;
-    font-size:28px;font-weight:700;color:var(--accent);
-    margin-left:6px;line-height:1;
+    font-size:26px;font-weight:700;color:var(--accent);
+    margin-left:4px;line-height:1;
   }
   .target-bar .progress{
-    font-size:12px;color:var(--text-3);margin-left:8px;
+    font-size:11px;color:var(--text-3);margin-left:6px;
   }
 
-  .grid-wrap{display:flex;justify-content:center;align-items:center}
+  .grid-wrap{
+    flex:1;display:flex;justify-content:center;align-items:center;
+    overflow:hidden;
+  }
   #game-grid{display:grid;gap:6px}
   .cell{
     display:flex;align-items:center;justify-content:center;
@@ -286,13 +298,6 @@
         </div>
       </div>
       <div class="toggle-group-wrap">
-        <div class="section-label">マスサイズ</div>
-        <div class="toggle-group" id="cell-group">
-          <button class="toggle-btn selected" data-val="normal" onclick="selectToggle('cell-group',this)">標準</button>
-          <button class="toggle-btn" data-val="large" onclick="selectToggle('cell-group',this)">大</button>
-        </div>
-      </div>
-      <div class="toggle-group-wrap">
         <div class="section-label">ヒント</div>
         <div class="toggle-group" id="hint-group">
           <button class="toggle-btn selected" data-val="0" onclick="selectToggle('hint-group',this)">OFF</button>
@@ -412,16 +417,23 @@ function shuffle(arr){
   return arr;
 }
 
-function getFontPx(){
-  return {small:15, medium:20, large:27}[cfg.fontSize]||20;
+function getFontPx(cellPx){
+  var ratio = {small:0.32, medium:0.42, large:0.54}[cfg.fontSize]||0.42;
+  return Math.round(cellPx * ratio);
 }
 
 function getCellPx(){
-  var maxW = Math.min(window.innerWidth-32, 560);
   var gap = 6;
-  var base = Math.floor((maxW - gap*(cfg.size-1)) / cfg.size);
-  var sz = Math.max(44, Math.min(base, cfg.cellSize==='large'?100:80));
-  return sz;
+  var padH = 24; // 左右padding 12px×2
+  var padV = 24; // 上下padding 12px+8px
+  // ヘッダー約60px＋ターゲットバー約46px
+  var headerH = 106;
+  var availW = window.innerWidth - padH;
+  var availH = window.innerHeight - padV - headerH;
+  var byW = Math.floor((availW - gap*(cfg.size-1)) / cfg.size);
+  var byH = Math.floor((availH - gap*(cfg.size-1)) / cfg.size);
+  var sz = Math.min(byW, byH);
+  return Math.max(44, sz);
 }
 
 function startGame(){
@@ -432,7 +444,7 @@ function startGame(){
 
   var positions = shuffle(seq.slice());
   var cellPx = getCellPx();
-  var fontPx = getFontPx();
+  var fontPx = getFontPx(cellPx);
 
   state = {
     seq: seq,
@@ -596,6 +608,21 @@ function quitGame(){
 
 function retryGame(){ startGame(); }
 function goHome(){ showScreen('home-screen'); }
+
+// 画面回転・リサイズ時にグリッドを再計算
+window.addEventListener('resize', function(){
+  if(state && state.seq && document.getElementById('game-screen').classList.contains('active')){
+    var cellPx = getCellPx();
+    var fontPx = getFontPx(cellPx);
+    var grid = document.getElementById('game-grid');
+    grid.style.gridTemplateColumns = 'repeat('+state.size+', '+cellPx+'px)';
+    grid.querySelectorAll('.cell').forEach(function(c){
+      c.style.width = cellPx+'px';
+      c.style.height = cellPx+'px';
+      c.style.fontSize = fontPx+'px';
+    });
+  }
+});
 </script>
 </body>
 </html>
