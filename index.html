@@ -50,6 +50,11 @@
     align-items:flex-start;
     justify-content:center;
     padding:1.5rem 1rem 3rem;
+    /* ── iPad誤操作対策 ── */
+    -webkit-user-select:none;    /* テキスト選択を禁止（Safari用）→虫眼鏡が出なくなる */
+    user-select:none;            /* テキスト選択を禁止（標準の書き方） */
+    -webkit-touch-callout:none;  /* 長押しメニュー（コピー・調べる等）を禁止 */
+    touch-action:manipulation;   /* ダブルタップ拡大を無効化。タップの反応も速くなる */
   }
   #app{width:100%;max-width:560px}
 
@@ -398,6 +403,32 @@
 </div><!-- #app -->
 
 <script>
+/* ── iPad誤操作対策（拡大の禁止） ── */
+
+// ①ピンチ拡大の禁止（Safari専用の「gesturestart」イベントを使う）
+document.addEventListener('gesturestart', function(e){
+  e.preventDefault();  // ブラウザ標準の拡大動作をキャンセル
+});
+
+// ②2本指での画面操作の禁止（ピンチの取りこぼし対策の保険）
+document.addEventListener('touchmove', function(e){
+  if(e.touches.length > 1){  // 画面に触れている指が2本以上なら
+    e.preventDefault();
+  }
+}, {passive:false});  // preventDefaultを有効にするために必要な宣言
+
+// ③ダブルタップ拡大の禁止
+//   ※マス（.cell）とボタンは除外。除外しないと数字を素早く連打したときに
+//     2回目のタップが無効化されてゲームが反応しなくなるため
+var lastTouchEnd = 0;
+document.addEventListener('touchend', function(e){
+  var now = Date.now();
+  if(now - lastTouchEnd < 300 && !e.target.closest('.cell, button')){
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, {passive:false});
+
 var cfg = {mode:'asc', size:3, fontSize:'medium', cellSize:'normal', hint:0, feedback:'on'};
 var state = {};
 
